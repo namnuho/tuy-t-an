@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TUYẾT AN & HER BELOVED - RESTAURANT MANAGEMENT SYSTEM</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter & Playfair Display for Luxury Feel -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,800;1,400&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        luxury: {
+                            black: '#0a0a0a',
+                            dark: '#121212',
+                            card: '#1a1a1a',
+                            border: '#2e2e2e',
+                            silver: '#e5e5e5',
+                            gold: '#d4af37'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333333;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555555;
+        }
+        .glass-panel {
+            background: rgba(26, 26, 26, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-black text-neutral-200 font-sans min-h-screen flex flex-col antialiased selection:bg-white selection:text-black">
+
+    <!-- TOP NAVIGATION BAR -->
+    <header class="border-b border-neutral-800 bg-luxury-dark/90 sticky top-0 z-40 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            
+            <!-- Restaurant Branding (Dual Language Header) -->
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 rounded-full border border-neutral-600 bg-neutral-900 flex items-center justify-center font-serif text-xl font-bold text-white shadow-inner">
+                    TA
+                </div>
+                <div>
+                    <h1 class="font-serif text-lg sm:text-xl font-bold tracking-wider text-white uppercase">
+                        TUYẾT AN & HER BELOVED
+                    </h1>
+                    <p class="text-xs text-neutral-400 tracking-widest uppercase">
+                        FINE DINING & RESTAURANT MANAGEMENT • <span class="text-neutral-500">QUẢN LÝ NHÀ HÀNG CAO CẤP</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Role Indicator & Auto Mode Toggle & Clock -->
+            <div class="hidden md:flex items-center space-x-6">
+                <!-- AUTO GUEST MODE TOGGLE BUTTON -->
+                <div class="flex items-center gap-3 bg-neutral-900 border border-neutral-700/80 px-3 py-1.5 rounded-xl shadow-inner">
+                    <div class="text-right">
+                        <p class="text-[10px] font-mono uppercase text-neutral-400 font-bold tracking-wider">AUTO GUEST MODE</p>
+                        <p class="text-xs text-neutral-300 font-semibold">Tự Động Gọi Món</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="auto-mode-toggle" onchange="Controller.toggleAutoGuestMode(this.checked)" class="sr-only peer">
+                        <div class="w-11 h-6 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-neutral-400 peer-checked:after:bg-black after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-white"></div>
+                    </label>
+                </div>
+
+                <div class="h-8 w-px bg-neutral-800"></div>
+
+                <div class="text-right">
+                    <p class="text-xs uppercase text-neutral-500 font-mono tracking-wider">CURRENT USER / NGƯỜI DÙNG</p>
+                    <p class="text-sm font-semibold text-white flex items-center justify-end gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Tuyết An (Manager / Quản Lý)
+                    </p>
+                </div>
+                <div class="h-8 w-px bg-neutral-800"></div>
+                <div class="text-right font-mono">
+                    <p id="live-time" class="text-sm font-bold text-white">00:00:00</p>
+                    <p id="live-date" class="text-xs text-neutral-500">YYYY-MM-DD</p>
+                </div>
+            </div>
+
+        </div>
+    </header>
+
+    <div class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col md:flex-row gap-6">
+
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="w-full md:w-64 flex-shrink-0">
+            <nav class="glass-panel rounded-2xl p-3 flex flex-row md:flex-col gap-2 overflow-x-auto md:overflow-visible">
+                <button onclick="Controller.switchTab('tables')" id="nav-tables" class="nav-btn active flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm font-medium transition-all duration-200 bg-white text-black font-semibold shadow-lg">
+                    <i class="fa-solid fa-table-cells text-base w-5"></i>
+                    <div>
+                        <div class="text-xs tracking-wider uppercase opacity-80">FLOOR MAP</div>
+                        <div class="text-sm font-bold">Sơ Đồ Bàn</div>
+                    </div>
+                </button>
+
+                <button onclick="Controller.switchTab('pos')" id="nav-pos" class="nav-btn flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm font-medium transition-all duration-200 text-neutral-400 hover:text-white hover:bg-neutral-900">
+                    <i class="fa-solid fa-cash-register text-base w-5"></i>
+                    <div>
+                        <div class="text-xs tracking-wider uppercase opacity-80">ORDER & POS</div>
+                        <div class="text-sm font-bold">Gọi Món & Đơn</div>
+                    </div>
+                </button>
+
+                <button onclick="Controller.switchTab('menu')" id="nav-menu" class="nav-btn flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm font-medium transition-all duration-200 text-neutral-400 hover:text-white hover:bg-neutral-900">
+                    <i class="fa-solid fa-utensils text-base w-5"></i>
+                    <div>
+                        <div class="text-xs tracking-wider uppercase opacity-80">MENU ITEMS</div>
+                        <div class="text-sm font-bold">Danh Mục Món</div>
+                    </div>
+                </button>
+
+                <button onclick="Controller.switchTab('reports')" id="nav-reports" class="nav-btn flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm font-medium transition-all duration-200 text-neutral-400 hover:text-white hover:bg-neutral-900">
+                    <i class="fa-solid fa-chart-line text-base w-5"></i>
+                    <div>
+                        <div class="text-xs tracking-wider uppercase opacity-80">ANALYTICS</div>
+                        <div class="text-sm font-bold">Báo Cáo Doanh Thu</div>
+                    </div>
+                </button>
+            </nav>
+
+            <!-- Quick Table Stats Card -->
+            <div class="glass-panel rounded-2xl p-4 mt-4 hidden md:block">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-xs uppercase font-bold text-neutral-400 tracking-wider">OVERVIEW / TỔNG QUAN</h3>
+                    <span id="auto-mode-badge" class="text-[9px] px-2 py-0.5 rounded-md bg-neutral-800 text-neutral-400 font-mono border border-neutral-700">AUTO: OFF</span>
+                </div>
+                <div class="space-y-3 text-xs">
+                    <div class="flex justify-between items-center text-neutral-300">
+                        <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Trống (Available):</span>
+                        <span id="stat-empty" class="font-bold text-white">0</span>
+                    </div>
+                    <div class="flex justify-between items-center text-neutral-300">
+                        <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-rose-500"></span> Đang Dùng (Occupied):</span>
+                        <span id="stat-occupied" class="font-bold text-white">0</span>
+                    </div>
+                    <div class="flex justify-between items-center text-neutral-300">
+                        <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Đã Đặt (Reserved):</span>
+                        <span id="stat-reserved" class="font-bold text-white">0</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN VIEW AREA -->
+        <main class="flex-1 min-w-0">
+
+            <!-- SECTION 1: TABLES VIEW -->
+            <section id="view-tables" class="space-y-6">
+                <!-- Header Controls -->
+                <div class="glass-panel rounded-2xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-white uppercase tracking-wider">TABLE MANAGEMENT / QUẢN LÝ BÀN (20 BÀN)</h2>
+                        <p class="text-xs text-neutral-400">Bấm vào bàn để đặt món hoặc dọn bàn về trạng thái trống ngay lập tức.</p>
+                    </div>
+
+                    <!-- Filter buttons -->
+                    <div class="flex flex-wrap gap-2 text-xs">
+                        <button onclick="Controller.filterTables('all')" class="px-3 py-1.5 rounded-lg border border-neutral-700 bg-neutral-800 text-white hover:bg-neutral-700 font-medium">Tất cả (All)</button>
+                        <button onclick="Controller.filterTables('empty')" class="px-3 py-1.5 rounded-lg border border-emerald-900 bg-emerald-950/50 text-emerald-400 hover:bg-emerald-900/50">Trống</button>
+                        <button onclick="Controller.filterTables('occupied')" class="px-3 py-1.5 rounded-lg border border-rose-900 bg-rose-950/50 text-rose-400 hover:bg-rose-900/50">Đang Dùng</button>
+                        <button onclick="Controller.filterTables('reserved')" class="px-3 py-1.5 rounded-lg border border-amber-900 bg-amber-950/50 text-amber-400 hover:bg-amber-900/50">Đã Đặt</button>
+                    </div>
+                </div>
+
+                <!-- Tables Grid -->
+                <div id="tables-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                    <!-- Dynamic Tables Generated Here -->
+                </div>
+            </section>
+
+            <!-- SECTION 2: POS ORDER SYSTEM -->
+            <section id="view-pos" class="hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    
+                    <!-- Left Menu Catalog (7 Cols) -->
+                    <div class="lg:col-span-7 space-y-4">
+                        <div class="glass-panel rounded-2xl p-4 flex flex-wrap gap-2 justify-between items-center">
+                            <span class="text-xs uppercase font-bold text-neutral-400 tracking-wider">SELECT CATEGORY / CHỌN DANH MỤC:</span>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="Controller.filterMenuCategory('all')" class="cat-btn px-3 py-1.5 text-xs rounded-xl bg-white text-black font-bold">Tất Cả</button>
+                                <button onclick="Controller.filterMenuCategory('hotpot')" class="cat-btn px-3 py-1.5 text-xs rounded-xl bg-neutral-900 text-neutral-300 border border-neutral-800 hover:border-white">Lẩu & Nướng</button>
+                                <button onclick="Controller.filterMenuCategory('appetizer')" class="cat-btn px-3 py-1.5 text-xs rounded-xl bg-neutral-900 text-neutral-300 border border-neutral-800 hover:border-white">Khai Vị</button>
+                                <button onclick="Controller.filterMenuCategory('drink')" class="cat-btn px-3 py-1.5 text-xs rounded-xl bg-neutral-900 text-neutral-300 border border-neutral-800 hover:border-white">Đồ Uống</button>
+                                <button onclick="Controller.filterMenuCategory('dessert')" class="cat-btn px-3 py-1.5 text-xs rounded-xl bg-neutral-900 text-neutral-300 border border-neutral-800 hover:border-white">Tráng Miệng</button>
+                            </div>
+                        </div>
+
+                        <!-- Menu Cards Grid -->
+                        <div id="pos-menu-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[600px] overflow-y-auto pr-2">
+                            <!-- Items auto injected -->
+                        </div>
+                    </div>
+
+                    <!-- Right Active Order & Bill (5 Cols) -->
+                    <div class="lg:col-span-5">
+                        <div class="glass-panel rounded-2xl p-5 sticky top-28 flex flex-col justify-between min-h-[550px]">
+                            <div>
+                                <div class="flex justify-between items-center border-b border-neutral-800 pb-3 mb-4">
+                                    <div>
+                                        <h3 class="text-base font-bold text-white uppercase">ORDER DETAIL / BẢNG GỌI MÓN</h3>
+                                        <p id="pos-current-table-label" class="text-xs text-amber-400 font-mono font-bold">Chưa chọn bàn (No table selected)</p>
+                                    </div>
+                                    <button onclick="Controller.clearCurrentOrder()" class="text-xs text-neutral-500 hover:text-rose-400 transition-colors">
+                                        <i class="fa-solid fa-trash-can mr-1"></i> Xóa Đơn
+                                    </button>
+                                </div>
+
+                                <!-- Selected Items Table -->
+                                <div id="order-items-list" class="space-y-3 max-h-[280px] overflow-y-auto pr-1">
+                                    <div class="text-center py-10 text-neutral-600 text-xs italic">
+                                        Chưa có món ăn nào trong đơn. Vui lòng chọn bàn và thêm món!
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Calculations & Actions -->
+                            <div class="border-t border-neutral-800 pt-4 mt-4 space-y-3">
+                                <div class="flex justify-between text-xs text-neutral-400">
+                                    <span>Tạm tính (Subtotal):</span>
+                                    <span id="pos-subtotal" class="font-mono text-white font-semibold">0 ₫</span>
+                                </div>
+                                <div class="flex justify-between text-xs text-neutral-400">
+                                    <span>Thuế VAT (10%):</span>
+                                    <span id="pos-tax" class="font-mono text-white">0 ₫</span>
+                                </div>
+                                <div class="flex justify-between text-base font-bold text-white pt-2 border-t border-neutral-800">
+                                    <span>TỔNG TIỀN (TOTAL):</span>
+                                    <span id="pos-total" class="font-mono text-white">0 ₫</span>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3 pt-2">
+                                    <button onclick="Controller.saveOrderToTable()" class="w-full py-3 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl text-xs font-bold uppercase transition-all">
+                                        Lưu Đơn (Save)
+                                    </button>
+                                    <button onclick="Controller.checkoutCurrentTable()" class="w-full py-3 bg-white hover:bg-neutral-200 text-black rounded-xl text-xs font-bold uppercase transition-all shadow-lg">
+                                        Thanh Toán (Pay)
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- SECTION 3: MENU MANAGEMENT -->
+            <section id="view-menu" class="hidden space-y-6">
+                <div class="glass-panel rounded-2xl p-5 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-lg font-bold text-white uppercase tracking-wider">MENU MANAGEMENT / QUẢN LÝ THỰC ĐƠN</h2>
+                        <p class="text-xs text-neutral-400">Danh sách các món ăn trong nhà hàng Tuyết An (Có sẵn đường dẫn hình ảnh dễ chỉnh sửa).</p>
+                    </div>
+                    <button onclick="Controller.showAddDishNotice()" class="px-4 py-2 bg-white text-black font-bold text-xs rounded-xl hover:bg-neutral-200 transition-all">
+                        + Thêm Món Mới
+                    </button>
+                </div>
+
+                <!-- Dish Table -->
+                <div class="glass-panel rounded-2xl overflow-hidden border border-neutral-800">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-neutral-300">
+                            <thead class="bg-neutral-900 uppercase font-mono text-neutral-400 border-b border-neutral-800">
+                                <tr>
+                                    <th class="p-4">Hình Ảnh</th>
+                                    <th class="p-4">Tên Món (English / Tiếng Việt)</th>
+                                    <th class="p-4">Danh Mục</th>
+                                    <th class="p-4 text-right">Đơn Giá</th>
+                                    <th class="p-4 text-center">Thao Tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="menu-table-body" class="divide-y divide-neutral-800/60">
+                                <!-- JS Populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: REPORTS & ANALYTICS -->
+            <section id="view-reports" class="hidden space-y-6">
+                <div class="glass-panel rounded-2xl p-5">
+                    <h2 class="text-lg font-bold text-white uppercase tracking-wider">REVENUE & ANALYTICS / BÁO CÁO DOANH THU</h2>
+                    <p class="text-xs text-neutral-400">Thống kê hoạt động kinh doanh nhà hàng Tuyết An & Beloved.</p>
+                </div>
+
+                <!-- Metric Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="glass-panel rounded-2xl p-5 border-l-4 border-emerald-500">
+                        <p class="text-xs uppercase text-neutral-400">Tổng Doanh Thu Hôm Nay</p>
+                        <h3 id="report-today-revenue" class="text-2xl font-bold font-mono text-white mt-1">0 ₫</h3>
+                        <p class="text-[10px] text-emerald-400 mt-2"><i class="fa-solid fa-arrow-trend-up"></i> +18.5% so với hôm qua</p>
+                    </div>
+                    <div class="glass-panel rounded-2xl p-5 border-l-4 border-amber-500">
+                        <p class="text-xs uppercase text-neutral-400">Lượt Đơn Phục Vụ</p>
+                        <h3 id="report-completed-orders" class="text-2xl font-bold font-mono text-white mt-1">0 Đơn</h3>
+                        <p class="text-[10px] text-amber-400 mt-2"><i class="fa-solid fa-users"></i> Đang hoạt động ổn định</p>
+                    </div>
+                    <div class="glass-panel rounded-2xl p-5 border-l-4 border-sky-500">
+                        <p class="text-xs uppercase text-neutral-400">Món Bán Chạy Nhất</p>
+                        <h3 class="text-base font-bold text-white mt-1 truncate">Combo Lẩu Tuyết An 2 Người</h3>
+                        <p class="text-[10px] text-sky-400 mt-2"><i class="fa-solid fa-fire"></i> 24 suất đã bán</p>
+                    </div>
+                </div>
+
+                <!-- Recent Transactions History -->
+                <div class="glass-panel rounded-2xl p-5">
+                    <h3 class="text-sm font-bold text-white uppercase mb-4">LỊCH SỬ THANH TOÁN GẦN ĐÂY</h3>
+                    <div class="space-y-3" id="payment-history-list">
+                        <!-- History injected -->
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- CUSTOM MODAL FOR TABLE ACTION / EDIT -->
+    <div id="table-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel rounded-2xl max-w-md w-full p-6 space-y-5 border border-neutral-700 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-neutral-800 pb-3">
+                <h3 id="modal-table-title" class="text-lg font-bold text-white uppercase">THÔNG TIN BÀN</h3>
+                <button onclick="View.closeModal()" class="text-neutral-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div id="modal-table-content" class="space-y-3 text-xs text-neutral-300">
+                <!-- Injected table dynamic info -->
+            </div>
+
+            <div id="modal-action-buttons" class="flex flex-col gap-2 pt-2 border-t border-neutral-800">
+                <!-- Dynamic action buttons injected here based on table status -->
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION TOAST -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-neutral-800 bg-neutral-950 py-4 text-center text-xs text-neutral-500">
+        <p>© 2026 Tuyết An & Beloved Restaurant System • Designed in High-End Monochrome Concept</p>
+    </footer>
+
+    <script>
+        // =========================================================================
+        // 1. MODEL LAYER (Quản lý dữ liệu & Logic nghiệp vụ thuần túy)
+        // =========================================================================
+        const Model = {
+            autoGuestMode: false,
+            tableTimers: {},
+            todayRevenue: 4265000,
+            completedOrdersCount: 12,
+
+            activityLogs: [
+                {
+                    type: 'payment',
+                    title: 'Thanh toán Bàn VIP 01',
+                    desc: 'Thanh toán thành công 4 món • Tiền mặt',
+                    amount: 1280000,
+                    time: '12:15:30'
+                },
+                {
+                    type: 'order',
+                    title: 'Lưu & Đặt món Bàn 03',
+                    desc: 'Đã thêm Combo Lẩu Tuyết An 2 Người & 2 Cocktail',
+                    amount: 0,
+                    time: '12:02:10'
+                },
+                {
+                    type: 'clear',
+                    title: 'Dọn & Hủy Bàn 05',
+                    desc: 'Khách đã rời bàn. Bàn sẵn sàng đón lượt tiếp theo!',
+                    amount: 0,
+                    time: '11:45:00'
+                },
+                {
+                    type: 'payment',
+                    title: 'Thanh toán Bàn 02',
+                    desc: 'Thanh toán thành công Combo Nướng 3 Người',
+                    amount: 759000,
+                    time: '11:30:15'
+                }
+            ],
+
+            categories: [
+                { id: 'hotpot', name: 'Lẩu & Nướng / Hotpot & BBQ' },
+                { id: 'appetizer', name: 'Khai Vị / Appetizers' },
+                { id: 'drink', name: 'Đồ Uống / Beverages' },
+                { id: 'dessert', name: 'Tráng Miệng / Desserts' }
+            ],
+
+            // 10 Món Lẩu/Nướng, 10 Món Khai vị, 10 Món Đồ uống, 5 Món Tráng miệng
+            dishes: [
+                // HOTPOT & BBQ (10 món)
+                { id: 101, category: 'hotpot', enName: 'Tuyet An Combo (2 Pax)', vnName: 'Combo Tuyết An 2 Người', price: 490000, img: 'https://images.unsplash.com/photo-1555126634-323283e090fa?w=400&q=80' },
+                { id: 102, category: 'hotpot', enName: 'Luxury BBQ Set (3 Pax)', vnName: 'Combo Nướng Thượng Hạng 3 Người', price: 690000, img: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80' },
+                { id: 103, category: 'hotpot', enName: 'Royal Hotpot Feast (4 Pax)', vnName: 'Combo Lẩu Hoàng Gia 4 Người', price: 890000, img: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&q=80' },
+                { id: 104, category: 'hotpot', enName: 'Wagyu Beef Ribeye', vnName: 'Dẻ Sườn Bò Wagyu', price: 350000, img: 'https://images.unsplash.com/photo-1558030006-450675393462?w=400&q=80' },
+                { id: 105, category: 'hotpot', enName: 'Australian Beef Short Ribs', vnName: 'Dẻ Sườn Bò Úc Nướng', price: 280000, img: 'https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=400&q=80' },
+                { id: 106, category: 'hotpot', enName: 'Seafood Hotpot Set', vnName: 'Set Lẩu Hải Sản Cua Tôm', price: 420000, img: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400&q=80' },
+                { id: 107, category: 'hotpot', enName: 'Tom Yum Spicy Hotpot', vnName: 'Lẩu Thái Tomyum Cay Nhè', price: 320000, img: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&q=80' },
+                { id: 108, category: 'hotpot', enName: 'Kurobuta Pork Belly', vnName: 'Ba Chỉ Heo Kurobuta Nướng', price: 210000, img: 'https://images.unsplash.com/photo-1603048588665-791ca8aea617?w=400&q=80' },
+                { id: 109, category: 'hotpot', enName: 'Grilled Seafood Platter', vnName: 'Đĩa Hải Sản Nướng Bơ Tỏi', price: 480000, img: 'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?w=400&q=80' },
+                { id: 110, category: 'hotpot', enName: 'Cheese Stuffed Pork Roll', vnName: 'Thịt Heo Cuộn Phô Mai Nướng', price: 180000, img: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=400&q=80' },
+
+                // APPETIZERS (10 món)
+                { id: 201, category: 'appetizer', enName: 'Salmon Carpaccio', vnName: 'Cá Hồi Tươi Sốt Chanh Tỏi', price: 160000, img: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=400&q=80' },
+                { id: 202, category: 'appetizer', enName: 'Fresh Spring Rolls', vnName: 'Gỏi Cuốn Tôm Thịt Tuyết An', price: 95000, img: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400&q=80' },
+                { id: 203, category: 'appetizer', enName: 'Crispy Calamari', vnName: 'Mực Chiên Xù Sốt Mayonnaise', price: 135000, img: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=400&q=80' },
+                { id: 204, category: 'appetizer', enName: 'Caesar Salad Deluxe', vnName: 'Salad Caesar Sốt Kem Trứng', price: 120000, img: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80' },
+                { id: 205, category: 'appetizer', enName: 'Truffle French Fries', vnName: 'Khoai Tây Chiên Sốt Truffle', price: 85000, img: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&q=80' },
+                { id: 206, category: 'appetizer', enName: 'Grilled Garlic Bread', vnName: 'Bánh Mì Bơ Tỏi Nướng Giòn', price: 55000, img: 'https://images.unsplash.com/photo-1572449043416-55f4685c9bb7?w=400&q=80' },
+                { id: 207, category: 'appetizer', enName: 'Soft Shell Crab', vnName: 'Cua Lột Chiên Giòn Sốt Me', price: 175000, img: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80' },
+                { id: 208, category: 'appetizer', enName: 'French Beef Tartare', vnName: 'Bò Tái Kiểu Pháp', price: 210000, img: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80' },
+                { id: 209, category: 'appetizer', enName: 'Pumpkin Soup with Truffle', vnName: 'Súp Bí Đỏ Dầu Truffle', price: 90000, img: 'https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=400&q=80' },
+                { id: 210, category: 'appetizer', enName: 'Edamame Soybeans', vnName: 'Đậu Nành Nhật Luộc Muối Biển', price: 60000, img: 'https://images.unsplash.com/photo-1564834724105-918b73d1b9e0?w=400&q=80' },
+
+                // DRINKS (10 món)
+                { id: 301, category: 'drink', enName: 'Signature Tuyet An Cocktail', vnName: 'Cocktail Tuyết An Special', price: 150000, img: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=400&q=80' },
+                { id: 302, category: 'drink', enName: 'Cabernet Sauvignon Red Wine', vnName: 'Rượu Vang Đỏ (Ly / Glass)', price: 180000, img: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400&q=80' },
+                { id: 303, category: 'drink', enName: 'Sauvignon Blanc White Wine', vnName: 'Rượu Vang Trắng (Ly / Glass)', price: 170000, img: 'https://images.unsplash.com/photo-1558001373-a21235165c3e?w=400&q=80' },
+                { id: 304, category: 'drink', enName: 'Fresh Orange Juice', vnName: 'Nước Cam Ép Tươi Nguyên Chất', price: 55000, img: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?w=400&q=80' },
+                { id: 305, category: 'drink', enName: 'Iced Uji Matcha Latte', vnName: 'Matcha Latte Nhật Bản', price: 65000, img: 'https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=400&q=80' },
+                { id: 306, category: 'drink', enName: 'Double Espresso', vnName: 'Cà Phê Espresso Đậm Đà', price: 45000, img: 'https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=400&q=80' },
+                { id: 307, category: 'drink', enName: 'Coca Cola Original', vnName: 'Nước Ngọt Coca Cola', price: 30000, img: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80' },
+                { id: 308, category: 'drink', enName: 'Sprite Refreshing', vnName: 'Nước Ngọt Sprite Chanh', price: 30000, img: 'https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=400&q=80' },
+                { id: 309, category: 'drink', enName: 'San Pellegrino Sparkling Water', vnName: 'Nước Khoáng Có Gas Ý', price: 60000, img: 'https://images.unsplash.com/photo-1527661591475-527312dd65f5?w=400&q=80' },
+                { id: 310, category: 'drink', enName: 'Cold Brew Peach Tea', vnName: 'Trà Đào Cam Sả Ương Lạnh', price: 55000, img: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&q=80' },
+
+                // DESSERTS (5 món)
+                { id: 401, category: 'dessert', enName: 'Fresh Tropical Fruit Platter', vnName: 'Đĩa Trái Cây Tươi Bốn Mùa', price: 120000, img: 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400&q=80' },
+                { id: 402, category: 'dessert', enName: 'Artisan Gelato Ice Cream', vnName: 'Kem Gelato Ý Cao Cấp', price: 75000, img: 'https://images.unsplash.com/photo-1567206563064-6f60f4078b57?w=400&q=80' },
+                { id: 403, category: 'dessert', enName: 'Classic Italian Tiramisu', vnName: 'Bánh Tiramisu Hương Cà Phê', price: 95000, img: 'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=400&q=80' },
+                { id: 404, category: 'dessert', enName: 'Chocolate Molten Lava Cake', vnName: 'Bánh Socola Tan Chảy', price: 110000, img: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&q=80' },
+                { id: 405, category: 'dessert', enName: 'Matcha Panna Cotta', vnName: 'Panna Cotta Trà Xanh Nhật', price: 85000, img: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&q=80' }
+            ],
+
+            tables: [],
+
+            initTables() {
+                this.tables = [];
+                // 15 Bàn Thường (Standard Tables)
+                for (let i = 1; i <= 15; i++) {
+                    const id = `table-${i}`;
+                    const num = i < 10 ? `0${i}` : `${i}`;
+                    let initialStatus = 'empty';
+                    let items = [];
+
+                    if (i === 2) {
+                        initialStatus = 'occupied';
+                        items = [{ dishId: 101, qty: 1 }, { dishId: 301, qty: 2 }];
+                    } else if (i === 3) {
+                        initialStatus = 'reserved';
+                    } else if (i === 7) {
+                        initialStatus = 'occupied';
+                        items = [{ dishId: 102, qty: 1 }, { dishId: 201, qty: 1 }, { dishId: 302, qty: 2 }];
+                    }
+
+                    this.tables.push({
+                        id: id,
+                        name: `Bàn ${num}`,
+                        capacity: i % 2 === 0 ? 4 : 2,
+                        isVIP: false,
+                        status: initialStatus,
+                        orderItems: items
+                    });
+                }
+
+                // 5 Bàn VIP (VIP Tables)
+                for (let i = 1; i <= 5; i++) {
+                    const id = `vip-${i}`;
+                    let initialStatus = i === 1 ? 'occupied' : (i === 3 ? 'reserved' : 'empty');
+                    let items = i === 1 ? [{ dishId: 103, qty: 1 }, { dishId: 208, qty: 1 }, { dishId: 302, qty: 4 }] : [];
+
+                    this.tables.push({
+                        id: id,
+                        name: `Bàn VIP 0${i}`,
+                        capacity: 8,
+                        isVIP: true,
+                        status: initialStatus,
+                        orderItems: items
+                    });
+                }
+            },
+
+            logActivity(type, title, desc, amount = 0) {
+                const now = new Date();
+                const timeStr = now.toTimeString().split(' ')[0];
+                this.activityLogs.unshift({
+                    type,
+                    title,
+                    desc,
+                    amount,
+                    time: timeStr
+                });
+                if (this.activityLogs.length > 30) this.activityLogs.pop();
+            },
+
+            enqueueTableForCustomer(tableId) {
+                // Tìm thời gian còn lại lớn nhất trong số các bàn đang chờ khách
+                let maxTime = 0;
+                Object.keys(this.tableTimers).forEach(id => {
+                    const t = this.tables.find(tbl => tbl.id === id);
+                    if (t && t.status === 'empty') {
+                        if (this.tableTimers[id].remaining > maxTime) {
+                            maxTime = this.tableTimers[id].remaining;
+                        }
+                    }
+                });
+
+                // Xếp nối tiếp: Nếu chưa có bàn nào chờ thì 30s, có bàn rồi thì cộng thêm 30s
+                const nextDelay = maxTime > 0 ? maxTime + 30 : 30;
+                this.startCustomerArrivalTimer(tableId, nextDelay);
+            },
+
+            resetTableToEmpty(tableId, isCheckout = false) {
+                const table = this.tables.find(t => t.id === tableId);
+                if (table) {
+                    if (!isCheckout) {
+                        this.logActivity('clear', `Dọn & Hủy Bàn ${table.name}`, 'Đã dọn sạch bàn. Khách tiếp theo sẽ vào nối tiếp sau 30s!', 0);
+                    }
+                    table.status = 'empty';
+                    table.orderItems = [];
+
+                    // Thêm bàn trống vào hàng chờ đón khách nối tiếp 30s
+                    this.enqueueTableForCustomer(tableId);
+                    return true;
+                }
+                return false;
+            },
+
+            startCustomerArrivalTimer(tableId, durationSeconds = 30) {
+                if (this.tableTimers[tableId]) {
+                    clearInterval(this.tableTimers[tableId].intervalId);
+                }
+
+                this.tableTimers[tableId] = {
+                    remaining: durationSeconds,
+                    intervalId: setInterval(() => {
+                        this.tableTimers[tableId].remaining -= 1;
+
+                        if (this.tableTimers[tableId].remaining <= 0) {
+                            clearInterval(this.tableTimers[tableId].intervalId);
+                            delete this.tableTimers[tableId];
+                            this.onCustomerArrived(tableId);
+                        } else {
+                            View.renderTables();
+                        }
+                    }, 1000)
+                };
+            },
+
+            onCustomerArrived(tableId) {
+                const table = this.tables.find(t => t.id === tableId);
+                if (!table || table.status !== 'empty') return;
+
+                table.status = 'occupied';
+
+                if (this.autoGuestMode) {
+                    table.orderItems = this.generateRandomOrder();
+                    const totalItems = table.orderItems.reduce((acc, i) => acc + i.qty, 0);
+                    this.logActivity('order', `[AUTO] Khách mới vào ${table.name}`, `Khách đã ngồi vào bàn & Tự động chọn ${totalItems} món! (Khách tiếp theo sau 30s)`, 0);
+                } else {
+                    this.logActivity('reserve', `Khách mới vào ${table.name}`, `Bàn đã chuyển sang trạng thái Đang Dùng. Mời gọi món!`, 0);
+                }
+
+                View.renderTables();
+                View.renderHistory();
+                View.updateStats();
+            },
+
+            generateRandomOrder() {
+                const randomOrder = [];
+                const hotpots = this.dishes.filter(d => d.category === 'hotpot');
+                const randomHotpot = hotpots[Math.floor(Math.random() * hotpots.length)];
+                if (randomHotpot) randomOrder.push({ dishId: randomHotpot.id, qty: 1 });
+
+                const appetizers = this.dishes.filter(d => d.category === 'appetizer');
+                const randomApp = appetizers[Math.floor(Math.random() * appetizers.length)];
+                if (randomApp) randomOrder.push({ dishId: randomApp.id, qty: 1 });
+
+                const drinks = this.dishes.filter(d => d.category === 'drink');
+                const randomDrink = drinks[Math.floor(Math.random() * drinks.length)];
+                if (randomDrink) randomOrder.push({ dishId: randomDrink.id, qty: 2 });
+
+                if (Math.random() > 0.5) {
+                    const desserts = this.dishes.filter(d => d.category === 'dessert');
+                    const randomDessert = desserts[Math.floor(Math.random() * desserts.length)];
+                    if (randomDessert) randomOrder.push({ dishId: randomDessert.id, qty: 1 });
+                }
+
+                return randomOrder;
+            }
+        };
+
+        // =========================================================================
+        // 2. VIEW LAYER (Hiển thị giao diện người dùng, không xử lý logic DB)
+        // =========================================================================
+        const View = {
+            currentSelectedTableId: null,
+
+            init() {
+                this.renderTables();
+                this.renderPosMenu();
+                this.renderMenuTable();
+                this.renderHistory();
+                this.updateStats();
+                this.startClock();
+            },
+
+            startClock() {
+                setInterval(() => {
+                    const now = new Date();
+                    document.getElementById('live-time').innerText = now.toLocaleTimeString('vi-VN');
+                    document.getElementById('live-date').innerText = now.toISOString().split('T')[0];
+                }, 1000);
+            },
+
+            renderTables(filter = 'all') {
+                const container = document.getElementById('tables-grid');
+                if (!container) return;
+                container.innerHTML = '';
+
+                const filtered = Model.tables.filter(t => {
+                    if (filter === 'all') return true;
+                    return t.status === filter;
+                });
+
+                filtered.forEach(table => {
+                    let statusBadge = '';
+                    let statusBorder = '';
+
+                    const timer = Model.tableTimers[table.id];
+                    let timerBadge = '';
+                    if (timer && timer.remaining > 0) {
+                        const queuePos = Math.ceil(timer.remaining / 30);
+                        timerBadge = `<div class="mt-1 text-[10px] font-mono font-bold text-amber-400 bg-amber-950/80 px-2 py-0.5 rounded-md border border-amber-800 inline-block animate-pulse"><i class="fa-regular fa-clock mr-1"></i>Khách vào: ${timer.remaining}s (Hàng #${queuePos})</div>`;
+                    }
+
+                    if (table.status === 'empty') {
+                        statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800 font-semibold">Trống</span>';
+                        statusBorder = 'border-neutral-800 hover:border-emerald-500';
+                    } else if (table.status === 'occupied') {
+                        statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] bg-rose-950 text-rose-400 border border-rose-800 font-semibold animate-pulse">Đang Dùng</span>';
+                        statusBorder = 'border-rose-900 bg-rose-950/20';
+                    } else {
+                        statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] bg-amber-950 text-amber-400 border border-amber-800 font-semibold">Đã Đặt</span>';
+                        statusBorder = 'border-amber-900 bg-amber-950/20';
+                    }
+
+                    const isVipBadge = table.isVIP ? '<span class="text-[10px] font-bold text-amber-400 flex items-center gap-1"><i class="fa-solid fa-crown text-[10px]"></i> VIP</span>' : '';
+
+                    let itemsCount = table.orderItems ? table.orderItems.length : 0;
+                    let quickActionsHtml = '';
+
+                    if (table.status === 'occupied') {
+                        // BÀN ĐANG DÙNG: Gọi Thêm Món & Tính Tiền
+                        quickActionsHtml = `
+                            <div class="flex items-center gap-1.5">
+                                <button onclick="event.stopPropagation(); Controller.openTableModal('${table.id}')" title="Gọi thêm món" class="px-2 py-1 bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 rounded-lg text-[10px] font-medium flex items-center gap-1">
+                                    <i class="fa-solid fa-plus text-[9px]"></i> Món
+                                </button>
+                                <button onclick="event.stopPropagation(); Controller.payTableDirectly('${table.id}')" title="Tính tiền ngay" class="px-2.5 py-1 bg-white hover:bg-neutral-200 text-black font-bold rounded-lg text-[10px] flex items-center gap-1 shadow-sm">
+                                    <i class="fa-solid fa-credit-card text-[9px]"></i> Tính Tiền
+                                </button>
+                            </div>
+                        `;
+                    } else if (table.status === 'reserved') {
+                        // BÀN ĐÃ ĐẶT: Giữ nút Dọn / Hủy Bàn Đặt
+                        quickActionsHtml = `
+                            <button onclick="event.stopPropagation(); Controller.cancelReservation('${table.id}')" title="Hủy đặt & Dọn bàn" class="px-2 py-1 bg-rose-950/80 hover:bg-rose-900 text-rose-200 border border-rose-800 rounded-lg text-[10px] flex items-center gap-1">
+                                <i class="fa-solid fa-ban text-[9px]"></i> Dọn / Hủy Bàn
+                            </button>
+                        `;
+                    } else {
+                        // BÀN TRỐNG
+                        quickActionsHtml = `<span class="text-neutral-400 text-[10px]">Chi tiết <i class="fa-solid fa-chevron-right text-[8px]"></i></span>`;
+                    }
+
+                    const card = document.createElement('div');
+                    card.className = `glass-panel rounded-2xl p-4 flex flex-col justify-between border ${statusBorder} transition-all duration-300 relative group cursor-pointer`;
+                    card.onclick = () => Controller.openTableModal(table.id);
+
+                    card.innerHTML = `
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                ${isVipBadge}
+                                ${statusBadge}
+                            </div>
+                            <h3 class="text-base font-bold text-white group-hover:text-amber-300 transition-colors">${table.name}</h3>
+                            <p class="text-[11px] text-neutral-400 mt-0.5"><i class="fa-solid fa-user-group text-[10px]"></i> Sức chứa: ${table.capacity} khách</p>
+                            ${timerBadge}
+                        </div>
+
+                        <div class="mt-4 pt-3 border-t border-neutral-800/80 flex items-center justify-between text-xs">
+                            <span class="text-neutral-500 text-[10px] font-mono">${itemsCount} món</span>
+                            ${quickActionsHtml}
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            },
+
+            renderPosMenu(category = 'all') {
+                const container = document.getElementById('pos-menu-grid');
+                if (!container) return;
+                container.innerHTML = '';
+
+                const filtered = category === 'all' 
+                    ? Model.dishes 
+                    : Model.dishes.filter(d => d.category === category);
+
+                filtered.forEach(dish => {
+                    const card = document.createElement('div');
+                    card.className = 'glass-panel rounded-2xl p-3 flex gap-3 items-center border border-neutral-800 hover:border-neutral-600 transition-all group';
+                    card.innerHTML = `
+                        <img src="${dish.img}" alt="${dish.enName}" class="w-20 h-20 rounded-xl object-cover border border-neutral-800 flex-shrink-0" onerror="this.src='https://placehold.co/100x100/1e1e1e/ffffff?text=Food'">
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs uppercase font-bold text-white truncate group-hover:text-amber-300 transition-colors">${dish.enName}</p>
+                            <p class="text-[11px] text-neutral-400 truncate">${dish.vnName}</p>
+                            <p class="text-xs font-mono font-bold text-amber-400 mt-1">${dish.price.toLocaleString('vi-VN')} ₫</p>
+                        </div>
+                        <button onclick="Controller.addDishToCurrentOrder(${dish.id})" class="px-3 py-2 bg-white text-black font-bold text-xs rounded-xl hover:bg-neutral-200 transition-all flex items-center justify-center gap-1 shadow-md">
+                            <i class="fa-solid fa-plus text-[10px]"></i> Thêm
+                        </button>
+                    `;
+                    container.appendChild(card);
+                });
+            },
+
+            renderMenuTable() {
+                const container = document.getElementById('menu-table-body');
+                if (!container) return;
+                container.innerHTML = '';
+
+                Model.dishes.forEach(dish => {
+                    const categoryObj = Model.categories.find(c => c.id === dish.category);
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-neutral-900/50 transition-colors';
+                    tr.innerHTML = `
+                        <td class="p-3">
+                            <img src="${dish.img}" alt="${dish.enName}" class="w-12 h-12 rounded-lg object-cover border border-neutral-800" onerror="this.src='https://placehold.co/100x100/1e1e1e/ffffff?text=Dish'">
+                        </td>
+                        <td class="p-3 font-medium">
+                            <div class="text-white font-bold uppercase text-xs">${dish.enName}</div>
+                            <div class="text-neutral-400 text-[11px]">${dish.vnName}</div>
+                        </td>
+                        <td class="p-3">
+                            <span class="px-2 py-1 rounded-md bg-neutral-900 border border-neutral-800 text-[10px] text-neutral-300 font-medium">
+                                ${categoryObj ? categoryObj.name : dish.category}
+                            </span>
+                        </td>
+                        <td class="p-3 text-right font-mono font-bold text-white text-xs">
+                            ${dish.price.toLocaleString('vi-VN')} ₫
+                        </td>
+                        <td class="p-3 text-center">
+                            <button onclick="View.showToast('Cập nhật dish trong source code')" class="text-neutral-400 hover:text-white px-2 py-1">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                        </td>
+                    `;
+                    container.appendChild(tr);
+                });
+            },
+
+            renderHistory() {
+                const container = document.getElementById('payment-history-list');
+                if (!container) return;
+                container.innerHTML = '';
+
+                if (!Model.activityLogs || Model.activityLogs.length === 0) {
+                    container.innerHTML = '<div class="text-center py-6 text-neutral-600 text-xs">Chưa có lịch sử hoạt động nào.</div>';
+                    return;
+                }
+
+                Model.activityLogs.forEach(log => {
+                    let iconClass = 'fa-solid fa-circle-info text-sky-400';
+                    let bgBadge = 'bg-sky-950/40 border-sky-800/60';
+
+                    if (log.type === 'payment') {
+                        iconClass = 'fa-solid fa-receipt text-emerald-400';
+                        bgBadge = 'bg-emerald-950/40 border-emerald-800/60';
+                    } else if (log.type === 'order') {
+                        iconClass = 'fa-solid fa-utensils text-amber-400';
+                        bgBadge = 'bg-amber-950/40 border-amber-800/60';
+                    } else if (log.type === 'clear') {
+                        iconClass = 'fa-solid fa-trash-can text-rose-400';
+                        bgBadge = 'bg-rose-950/40 border-rose-800/60';
+                    } else if (log.type === 'reserve') {
+                        iconClass = 'fa-solid fa-bookmark text-purple-400';
+                        bgBadge = 'bg-purple-950/40 border-purple-800/60';
+                    }
+
+                    const div = document.createElement('div');
+                    div.className = `p-3 rounded-xl border ${bgBadge} flex items-center justify-between text-xs transition-all hover:bg-neutral-900/60`;
+                    
+                    let amountHtml = '';
+                    if (log.amount > 0) {
+                        amountHtml = `<span class="font-mono font-bold text-emerald-400 text-sm">+${log.amount.toLocaleString('vi-VN')} ₫</span>`;
+                    }
+
+                    div.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-neutral-900 flex items-center justify-center border border-neutral-800">
+                                <i class="${iconClass}"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-white uppercase text-xs">${log.title}</h4>
+                                <p class="text-[11px] text-neutral-400">${log.desc}</p>
+                            </div>
+                        </div>
+                        <div class="text-right flex flex-col items-end">
+                            ${amountHtml}
+                            <span class="text-[10px] text-neutral-500 font-mono"><i class="fa-regular fa-clock mr-1"></i>${log.time}</span>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            },
+
+            updateStats() {
+                const emptyCount = Model.tables.filter(t => t.status === 'empty').length;
+                const occupiedCount = Model.tables.filter(t => t.status === 'occupied').length;
+                const reservedCount = Model.tables.filter(t => t.status === 'reserved').length;
+
+                const elEmpty = document.getElementById('stat-empty');
+                const elOccupied = document.getElementById('stat-occupied');
+                const elReserved = document.getElementById('stat-reserved');
+
+                if (elEmpty) elEmpty.innerText = emptyCount;
+                if (elOccupied) elOccupied.innerText = occupiedCount;
+                if (elReserved) elReserved.innerText = reservedCount;
+
+                const elRev = document.getElementById('report-today-revenue');
+                const elOrders = document.getElementById('report-completed-orders');
+
+                if (elRev) elRev.innerText = Model.todayRevenue.toLocaleString('vi-VN') + ' ₫';
+                if (elOrders) elOrders.innerText = Model.completedOrdersCount + ' Đơn';
+            },
+
+            showModal(table) {
+                this.currentSelectedTableId = table.id;
+                document.getElementById('modal-table-title').innerText = `${table.name} (${table.isVIP ? 'VIP' : 'Standard'})`;
+
+                const content = document.getElementById('modal-table-content');
+                const actionsContainer = document.getElementById('modal-action-buttons');
+                
+                // Tính tổng tiền bàn hiện tại
+                let subtotal = 0;
+                if (table.orderItems && table.orderItems.length > 0) {
+                    table.orderItems.forEach(item => {
+                        const dish = Model.dishes.find(d => d.id === item.dishId);
+                        if (dish) subtotal += dish.price * item.qty;
+                    });
+                }
+                const tax = subtotal * 0.1;
+                const grandTotal = subtotal + tax;
+
+                let statusText = '';
+                if (table.status === 'empty') statusText = '<span class="text-emerald-400 font-bold">TRỐNG (AVAILABLE)</span>';
+                else if (table.status === 'occupied') statusText = '<span class="text-rose-400 font-bold">ĐANG DÙNG (OCCUPIED)</span>';
+                else statusText = '<span class="text-amber-400 font-bold">ĐÃ ĐẶT (RESERVED)</span>';
+
+                content.innerHTML = `
+                    <div class="p-3.5 bg-neutral-900/90 rounded-xl space-y-2 border border-neutral-800">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-neutral-400">Trạng Thái:</span>
+                            <span>${statusText}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-neutral-400">Sức Chứa:</span>
+                            <span class="text-white font-semibold">${table.capacity} Khách</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-neutral-400">Số Món Đã Gọi:</span>
+                            <span class="text-white font-semibold font-mono">${table.orderItems ? table.orderItems.length : 0} Món</span>
+                        </div>
+                        ${table.status === 'occupied' ? `
+                            <div class="pt-2 border-t border-neutral-800 flex justify-between items-center">
+                                <span class="text-xs font-bold text-white uppercase">Tổng Tiền Cần Thanh Toán:</span>
+                                <span class="text-sm font-bold font-mono text-amber-400">${grandTotal.toLocaleString('vi-VN')} ₫</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+
+                actionsContainer.innerHTML = '';
+
+                if (table.status === 'occupied') {
+                    // BÀN ĐANG DÙNG: Hiển thị Gọi Thêm Món và Tính Tiền & Thanh Toán (Bỏ nút Dọn Bàn)
+                    actionsContainer.innerHTML = `
+                        <button id="modal-btn-add-item" class="w-full py-2.5 bg-neutral-800 border border-neutral-700 text-white font-bold rounded-xl text-xs hover:bg-neutral-700 uppercase transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-utensils"></i> Gọi Thêm Món (Add More Order)
+                        </button>
+                        <button id="modal-btn-pay" class="w-full py-3 bg-white text-black font-bold rounded-xl text-xs hover:bg-neutral-200 uppercase transition-all shadow-lg flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-credit-card"></i> Tính Tiền & Thanh Toán (${grandTotal.toLocaleString('vi-VN')} ₫)
+                        </button>
+                    `;
+
+                    document.getElementById('modal-btn-add-item').onclick = () => {
+                        this.closeModal();
+                        Controller.switchTab('pos');
+                        Controller.selectPosTable(table.id);
+                    };
+
+                    document.getElementById('modal-btn-pay').onclick = () => {
+                        this.closeModal();
+                        Controller.payTableDirectly(table.id);
+                    };
+
+                } else if (table.status === 'reserved') {
+                    // BÀN ĐÃ ĐẶT: Cho phép Khách Nhận Bàn Gọi Món hoặc Dọn / Hủy Bàn Đặt
+                    actionsContainer.innerHTML = `
+                        <button id="modal-btn-checkin" class="w-full py-2.5 bg-white text-black font-bold rounded-xl text-xs hover:bg-neutral-200 uppercase transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-chair"></i> Khách Nhận Bàn & Gọi Món
+                        </button>
+                        <button id="modal-btn-cancel-res" class="w-full py-2.5 bg-rose-950/80 border border-rose-800 text-rose-200 font-bold rounded-xl text-xs hover:bg-rose-900 uppercase transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-ban"></i> Dọn & Hủy Đặt Bàn (Reset to Empty)
+                        </button>
+                    `;
+
+                    document.getElementById('modal-btn-checkin').onclick = () => {
+                        table.status = 'occupied';
+                        this.closeModal();
+                        Controller.switchTab('pos');
+                        Controller.selectPosTable(table.id);
+                    };
+
+                    document.getElementById('modal-btn-cancel-res').onclick = () => {
+                        this.closeModal();
+                        Controller.cancelReservation(table.id);
+                    };
+
+                } else {
+                    // BÀN TRỐNG: Tạo Đơn Gọi Món hoặc Đặt Bàn Trước
+                    actionsContainer.innerHTML = `
+                        <button id="modal-btn-open-order" class="w-full py-2.5 bg-white text-black font-bold rounded-xl text-xs hover:bg-neutral-200 uppercase transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-plus"></i> Khách Ngồi & Tạo Đơn
+                        </button>
+                        <button id="modal-btn-reserve" class="w-full py-2.5 bg-neutral-800 border border-neutral-700 text-amber-400 font-bold rounded-xl text-xs hover:bg-neutral-700 uppercase transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-bookmark"></i> Đặt Bàn Trước (Reserve)
+                        </button>
+                    `;
+
+                    document.getElementById('modal-btn-open-order').onclick = () => {
+                        table.status = 'occupied';
+                        this.closeModal();
+                        Controller.switchTab('pos');
+                        Controller.selectPosTable(table.id);
+                    };
+
+                    document.getElementById('modal-btn-reserve').onclick = () => {
+                        table.status = 'reserved';
+                        Model.logActivity('reserve', `Đặt trước ${table.name}`, `Bàn đã được giữ chỗ cho khách đặt trước`);
+                        this.closeModal();
+                        View.renderTables();
+                        View.updateStats();
+                        View.renderHistory();
+                        View.showToast(`Đã ghi nhận đặt bàn cho ${table.name}!`);
+                    };
+                }
+
+                document.getElementById('table-modal').classList.remove('hidden');
+            },
+
+            closeModal() {
+                document.getElementById('table-modal').classList.add('hidden');
+            },
+
+            showToast(message) {
+                const container = document.getElementById('toast-container');
+                if (!container) return;
+                const toast = document.createElement('div');
+                toast.className = 'bg-neutral-900 text-white border border-neutral-700 px-4 py-2.5 rounded-xl shadow-xl text-xs font-semibold flex items-center gap-2 animate-bounce';
+                toast.innerHTML = `<i class="fa-solid fa-circle-info text-amber-400"></i> ${message}`;
+                container.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+        };
+
+        // =========================================================================
+        // 3. CONTROLLER LAYER (Điều phối dữ liệu giữa Model và View)
+        // =========================================================================
+        const Controller = {
+            activePOSTableId: null,
+            currentPosOrder: [],
+
+            init() {
+                Model.initTables();
+                View.init();
+            },
+
+            payTableDirectly(tableId) {
+                const table = Model.tables.find(t => t.id === tableId);
+                if (!table) return;
+
+                if (!table.orderItems || table.orderItems.length === 0) {
+                    View.showToast(`Bàn ${table.name} chưa gọi món nào! Vui lòng chọn món trước.`);
+                    this.switchTab('pos');
+                    this.selectPosTable(tableId);
+                    return;
+                }
+
+                let subtotal = 0;
+                table.orderItems.forEach(item => {
+                    const dish = Model.dishes.find(d => d.id === item.dishId);
+                    if (dish) subtotal += dish.price * item.qty;
+                });
+                const grandTotal = subtotal * 1.1;
+
+                Model.todayRevenue += grandTotal;
+                Model.completedOrdersCount += 1;
+                Model.logActivity('payment', `Thanh toán ${table.name}`, `Thanh toán thành công ${table.orderItems.length} món • ${grandTotal.toLocaleString('vi-VN')} ₫`, grandTotal);
+
+                Model.resetTableToEmpty(tableId, true);
+
+                if (this.activePOSTableId === tableId) {
+                    this.currentPosOrder = [];
+                    this.renderCurrentPosOrder();
+                }
+
+                View.renderTables();
+                View.renderHistory();
+                View.updateStats();
+                View.showToast(`Thanh toán thành công cho ${table.name}! Đã dọn bàn.`);
+            },
+
+            cancelReservation(tableId) {
+                const table = Model.tables.find(t => t.id === tableId);
+                if (table) {
+                    table.status = 'empty';
+                    table.orderItems = [];
+                    Model.logActivity('clear', `Hủy Đặt Bàn ${table.name}`, 'Đã hủy giữ chỗ & dọn bàn về trạng thái trống.');
+                    View.renderTables();
+                    View.renderHistory();
+                    View.updateStats();
+                    View.showToast(`Đã dọn và đưa ${table.name} về trạng thái Trống!`);
+                }
+            },
+
+            switchTab(tabName) {
+                const views = ['tables', 'pos', 'menu', 'reports'];
+                views.forEach(v => {
+                    const el = document.getElementById(`view-${v}`);
+                    const btn = document.getElementById(`nav-${v}`);
+                    if (el) {
+                        if (v === tabName) {
+                            el.classList.remove('hidden');
+                        } else {
+                            el.classList.add('hidden');
+                        }
+                    }
+                    if (btn) {
+                        if (v === tabName) {
+                            btn.className = "nav-btn active flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm font-medium transition-all duration-200 bg-white text-black font-semibold shadow-lg";
+                        } else {
+                            btn.className = "nav-btn flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm font-medium transition-all duration-200 text-neutral-400 hover:text-white hover:bg-neutral-900";
+                        }
+                    }
+                });
+                if (tabName === 'reports') {
+                    View.renderHistory();
+                    View.updateStats();
+                }
+            },
+
+            toggleAutoGuestMode(enabled) {
+                Model.autoGuestMode = enabled;
+                const badge = document.getElementById('auto-mode-badge');
+                if (badge) {
+                    badge.innerText = enabled ? 'AUTO: ON (TỰ ĐỘNG)' : 'AUTO: OFF';
+                    badge.className = enabled ? 'text-[9px] px-2 py-0.5 rounded-md bg-emerald-950 text-emerald-400 font-mono border border-emerald-800 animate-pulse' : 'text-[9px] px-2 py-0.5 rounded-md bg-neutral-800 text-neutral-400 font-mono border border-neutral-700';
+                }
+
+                if (enabled) {
+                    Model.logActivity('order', 'Bật Chế Độ Tự Động Nhận Khách', 'Hệ thống xếp khách nối tiếp cứ 30 giây/bàn cho các bàn trống!');
+                    
+                    let count = 0;
+                    Model.tables.forEach(t => {
+                        if (t.status === 'empty' && !Model.tableTimers[t.id]) {
+                            count++;
+                            Model.startCustomerArrivalTimer(t.id, count * 30);
+                        }
+                    });
+                } else {
+                    Model.logActivity('clear', 'Tắt Chế Độ Tự Động', 'Đã chuyển về chế độ nhận khách thủ công');
+                }
+                View.renderHistory();
+            },
+
+            filterTables(status) {
+                View.renderTables(status);
+            },
+
+            quickClearTable(tableId) {
+                if (Model.resetTableToEmpty(tableId)) {
+                    View.renderTables();
+                    View.renderHistory();
+                    View.updateStats();
+                    if (this.activePOSTableId === tableId) {
+                        this.currentPosOrder = [];
+                        this.renderCurrentPosOrder();
+                    }
+                }
+            },
+
+            openTableModal(tableId) {
+                const table = Model.tables.find(t => t.id === tableId);
+                if (table) {
+                    View.showModal(table);
+                }
+            },
+
+            selectPosTable(tableId) {
+                this.activePOSTableId = tableId;
+                const table = Model.tables.find(t => t.id === tableId);
+                if (!table) return;
+
+                document.getElementById('pos-current-table-label').innerText = `ĐANG CHỌN: ${table.name} (${table.status.toUpperCase()})`;
+
+                this.currentPosOrder = table.orderItems ? [...table.orderItems] : [];
+                this.renderCurrentPosOrder();
+            },
+
+            addDishToCurrentOrder(dishId) {
+                if (!this.activePOSTableId) {
+                    this.selectPosTable(Model.tables[0].id);
+                }
+
+                const existing = this.currentPosOrder.find(item => item.dishId === dishId);
+                if (existing) {
+                    existing.qty += 1;
+                } else {
+                    this.currentPosOrder.push({ dishId, qty: 1 });
+                }
+
+                const table = Model.tables.find(t => t.id === this.activePOSTableId);
+                if (table) table.status = 'occupied';
+
+                this.renderCurrentPosOrder();
+                View.renderTables();
+                View.updateStats();
+            },
+
+            filterMenuCategory(category) {
+                View.renderPosMenu(category);
+            },
+
+            renderCurrentPosOrder() {
+                const container = document.getElementById('order-items-list');
+                if (!container) return;
+                container.innerHTML = '';
+
+                let subtotal = 0;
+
+                if (this.currentPosOrder.length === 0) {
+                    container.innerHTML = '<div class="text-center py-10 text-neutral-600 text-xs italic">Chưa có món ăn trong đơn.</div>';
+                } else {
+                    this.currentPosOrder.forEach((item, index) => {
+                        const dish = Model.dishes.find(d => d.id === item.dishId);
+                        if (!dish) return;
+
+                        const itemTotal = dish.price * item.qty;
+                        subtotal += itemTotal;
+
+                        const row = document.createElement('div');
+                        row.className = 'flex justify-between items-center bg-neutral-900/80 p-2.5 rounded-xl border border-neutral-800 text-xs';
+                        row.innerHTML = `
+                            <div class="flex-1 pr-2">
+                                <p class="font-bold text-white uppercase">${dish.enName}</p>
+                                <p class="text-[10px] text-amber-400 font-mono">${dish.price.toLocaleString('vi-VN')} ₫</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="Controller.updateQty(${index}, -1)" class="w-6 h-6 rounded-lg bg-neutral-800 text-white flex items-center justify-center font-bold hover:bg-neutral-700">-</button>
+                                <span class="font-bold font-mono text-white px-1">${item.qty}</span>
+                                <button onclick="Controller.updateQty(${index}, 1)" class="w-6 h-6 rounded-lg bg-neutral-800 text-white flex items-center justify-center font-bold hover:bg-neutral-700">+</button>
+                            </div>
+                        `;
+                        container.appendChild(row);
+                    });
+                }
+
+                const tax = subtotal * 0.1;
+                const total = subtotal + tax;
+
+                document.getElementById('pos-subtotal').innerText = subtotal.toLocaleString('vi-VN') + ' ₫';
+                document.getElementById('pos-tax').innerText = tax.toLocaleString('vi-VN') + ' ₫';
+                document.getElementById('pos-total').innerText = total.toLocaleString('vi-VN') + ' ₫';
+            },
+
+            updateQty(index, delta) {
+                if (this.currentPosOrder[index]) {
+                    this.currentPosOrder[index].qty += delta;
+                    if (this.currentPosOrder[index].qty <= 0) {
+                        this.currentPosOrder.splice(index, 1);
+                    }
+                    this.renderCurrentPosOrder();
+                }
+            },
+
+            clearCurrentOrder() {
+                this.currentPosOrder = [];
+                this.renderCurrentPosOrder();
+            },
+
+            saveOrderToTable() {
+                if (!this.activePOSTableId) return;
+                const table = Model.tables.find(t => t.id === this.activePOSTableId);
+                if (table) {
+                    table.orderItems = [...this.currentPosOrder];
+                    if (table.orderItems.length > 0) {
+                        table.status = 'occupied';
+                        Model.logActivity('order', `Lưu & Đặt món ${table.name}`, `Đã cập nhật ${table.orderItems.length} món vào đơn`, 0);
+                    }
+                    View.renderTables();
+                    View.renderHistory();
+                    View.updateStats();
+                    View.showToast(`Đã lưu đơn cho ${table.name}!`);
+                }
+            },
+
+            checkoutCurrentTable() {
+                if (!this.activePOSTableId || this.currentPosOrder.length === 0) {
+                    View.showToast('Vui lòng chọn bàn và thêm món trước khi thanh toán!');
+                    return;
+                }
+
+                const table = Model.tables.find(t => t.id === this.activePOSTableId);
+                let subtotal = 0;
+                this.currentPosOrder.forEach(item => {
+                    const dish = Model.dishes.find(d => d.id === item.dishId);
+                    if (dish) subtotal += dish.price * item.qty;
+                });
+                const total = subtotal * 1.1;
+
+                Model.todayRevenue += total;
+                Model.completedOrdersCount += 1;
+                Model.logActivity('payment', `Thanh toán ${table ? table.name : 'Bàn'}`, `Thanh toán thành công ${this.currentPosOrder.length} món`, total);
+
+                Model.resetTableToEmpty(this.activePOSTableId, true);
+
+                this.clearCurrentOrder();
+                View.renderTables();
+                View.renderHistory();
+                View.updateStats();
+                this.switchTab('reports');
+                View.showToast('Thanh toán thành công & Đã dọn bàn!');
+            },
+
+            showAddDishNotice() {
+                View.showToast('Tính năng Thêm Món Mới: Bạn có thể thêm trực tiếp vào mảng dishes trong source code JavaScript.');
+            }
+        };
+
+        window.onload = function() {
+            Controller.init();
+        };
+    </script>
+</body>
+</html>
